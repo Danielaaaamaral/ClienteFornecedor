@@ -13,7 +13,7 @@ namespace ClienteFornecedor.Entidades.classes
         public long IdPedido { get; set; }
         public Cliente Cliente { get; set; }
         public Fornecedor Fornecedor { get; set; }
-        public Itens Itens { get; set; }
+        public List<Itens> Itens { get; set; }
  
     }
 }

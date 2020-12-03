@@ -1,5 +1,7 @@
 ﻿using ClienteFornecedor.Contexto;
 using ClienteFornecedor.Entidades.classes;
+using ClienteFornecedor.Entidades.ViewModel;
+using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -134,7 +136,7 @@ namespace ClienteFornecedor.Repositorio
         {
             try
             {
-                var fornecedor = BuscarTodosFornecedores().Result.Where(x => x.IdFornecedor == id).FirstOrDefault();
+                var fornecedor = await BuscarFornecedorPorId(id);
                 _contexto.Fornecedor.Remove(fornecedor);
                 await _contexto.SaveChangesAsync();
             }
@@ -202,8 +204,8 @@ namespace ClienteFornecedor.Repositorio
         {
             try
             {
-                var cliente = BuscarTodosItens().Result.Where(x => x.IdItens == id).FirstOrDefault();
-                _contexto.Itens.Remove(cliente);
+                var itens = await BuscarItenPorId(id);
+                _contexto.Itens.Remove(itens);
                 await _contexto.SaveChangesAsync();
             }
             catch (Exception e)
@@ -229,6 +231,70 @@ namespace ClienteFornecedor.Repositorio
             try
             {
                 return await _contexto.Pedido.Where(x => x.IdPedido == Id).FirstOrDefaultAsync();
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+
+        public async Task<Pedido> AdicionarPedido(PedidoDto pedidoDto)
+        {
+            try
+            {
+                var cliente = await BuscarClientePorId(pedidoDto.IdCliente);
+                var fornecedor = await BuscarFornecedorPorId(pedidoDto.IdFornecedor);
+                Pedido pedido = new Pedido();
+                pedido.Cliente= cliente;
+                pedido.Fornecedor = fornecedor;
+      
+                foreach (int p in pedidoDto.ListItens) {
+                    var item = await BuscarItenPorId(p);
+                    pedido.Itens.Add(item); 
+                }
+                _contexto.Pedido.Add(pedido);
+                await _contexto.SaveChangesAsync();
+                return BuscarTodosPedidos().Result.Where(x=> x.Cliente.IdCliente== pedidoDto.IdCliente && x.Fornecedor.IdFornecedor==pedidoDto.IdFornecedor).FirstOrDefault();
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+        public async Task<Pedido> AtualizarPedido(PedidoDto pedidoDto , long id)
+        {
+            try
+            {
+                var cliente = await BuscarClientePorId(pedidoDto.IdCliente);
+                var fornecedor = await BuscarFornecedorPorId(pedidoDto.IdFornecedor);
+                Pedido pedido = new Pedido();
+                pedido.Cliente = cliente;
+                pedido.Fornecedor = fornecedor;
+                pedido.IdPedido = id;
+
+                foreach (int p in pedidoDto.ListItens)
+                {
+                    var item = await BuscarItenPorId(p);
+                    pedido.Itens.Add(item);
+                }
+                _contexto.Pedido.Update(pedido);
+                await _contexto.SaveChangesAsync();
+                return pedido;
+            }
+            catch (Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+        }
+        public async Task DeletarPedido(long id)
+        {
+            try
+            {
+                var pedido = await BuscarPedidoPorId(id);
+                _contexto.Pedido.Remove(pedido);
+                await _contexto.SaveChangesAsync();
             }
             catch (Exception e)
             {

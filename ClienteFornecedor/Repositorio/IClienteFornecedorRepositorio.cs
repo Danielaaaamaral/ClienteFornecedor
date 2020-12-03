@@ -1,4 +1,5 @@
 ﻿using ClienteFornecedor.Entidades.classes;
+using ClienteFornecedor.Entidades.ViewModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -35,9 +36,11 @@ namespace ClienteFornecedor.Repositorio
         #endregion
         #region pedido
         Task<List<Pedido>> BuscarTodosPedidos();
-
         Task<Pedido> BuscarPedidoPorId(long Id);
-       
+        Task<Pedido> AdicionarPedido(PedidoDto pedidoDto);
+        Task<Pedido> AtualizarPedido(PedidoDto pedidoDto,long id);
+        Task DeletarPedido(long id);
+
         #endregion
     }
 }
